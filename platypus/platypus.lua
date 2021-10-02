@@ -215,7 +215,7 @@ function M.create(config)
 			-- up-hill
 			if state.slope_right then
 				movement.y = -velocity * math.abs(state.slope_right.y)
-				movement.x = velocity * math.abs(state.slope_right.x)
+				movement.x = velocity * math.abs(0.2/state.slope_right.x)
 			-- down-hill
 			elseif state.slope_left then
 				movement.y = -velocity * math.abs(state.slope_left.y)
@@ -224,6 +224,10 @@ function M.create(config)
 			state.wall_slide = true
 			msg.post("#", M.WALL_SLIDE)			-- notify about starting wall slide
 			platypus.velocity.y = 0				-- reduce vertical speed
+				
+      msg.post("@render:", "draw_debug_text",
+				{ text = string.format("velocity: %s", platypus.velocity), position = vmath.vector3(10,100, 0),
+				color = vmath.vector4(1, 1, 1, 1) } )
 		end
 	end
 
@@ -361,7 +365,22 @@ function M.create(config)
 				state.slope_left = id == RAY_CAST_DOWN_LEFT_ID and result.normal.x ~= 0 and result.normal.y ~= 0 and result.normal
 				state.slope_right = id == RAY_CAST_DOWN_RIGHT_ID and result.normal.x ~= 0 and result.normal.y ~= 0 and result.normal
 
-				if id == RAY_CAST_DOWN_ID or id == RAY_CAST_DOWN_LEFT_ID or id == RAY_CAST_DOWN_RIGHT_ID then
+				msg.post("@render:", "draw_debug_text",
+					{ text = string.format("result.normal: %s , movement: %s", result.normal, movement), position = vmath.vector3(10,200, 0),
+					color = vmath.vector4(1, 1, 1, 1) } )
+
+       --local start_p = go.get_position("player")
+       if type(state.slope_right) ~= "boolean" then
+         local start_p = go.get_position()
+         local end_p = start_p + (state.slope_right * 20)
+         local color_red = vmath.vector4(1, 0, 1, 1)
+        msg.post("@render:", "draw_line", { start_point = start_p, end_point = end_p, color = color_red }) 
+      end
+
+
+
+				
+        if id == RAY_CAST_DOWN_ID or id == RAY_CAST_DOWN_LEFT_ID or id == RAY_CAST_DOWN_RIGHT_ID then
 					local collide_down = check_group_direction(result.group, M.DIR_DOWN)
 					if collide_down and result.normal.y > 0.7 and platypus.velocity.y < 0 and result.fraction < 1 then
 						if not state.ground_contact then
