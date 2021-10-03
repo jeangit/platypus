@@ -194,7 +194,7 @@ function M.create(config)
 			-- up-hill
 			elseif state.slope_left then
 				movement.y = -velocity * math.abs(state.slope_left.y)
-				movement.x = -velocity * math.abs(state.slope_left.x)
+				movement.x = -velocity * (1 - math.abs(state.slope_left.x))
 			end
 		elseif state.wall_contact ~= -1 and platypus.allow_wall_slide and platypus.is_falling() and not state.wall_slide then
 			state.wall_slide = true
@@ -215,7 +215,7 @@ function M.create(config)
 			-- up-hill
 			if state.slope_right then
 				movement.y = -velocity * math.abs(state.slope_right.y)
-				movement.x = velocity * math.abs(0.2/state.slope_right.x)
+				movement.x = velocity * (1 - math.abs(state.slope_right.x))
 			-- down-hill
 			elseif state.slope_left then
 				movement.y = -velocity * math.abs(state.slope_left.y)
@@ -225,10 +225,10 @@ function M.create(config)
 			msg.post("#", M.WALL_SLIDE)			-- notify about starting wall slide
 			platypus.velocity.y = 0				-- reduce vertical speed
 				
-      msg.post("@render:", "draw_debug_text",
-				{ text = string.format("velocity: %s", platypus.velocity), position = vmath.vector3(10,100, 0),
-				color = vmath.vector4(1, 1, 1, 1) } )
 		end
+      msg.post("@render:", "draw_debug_text",
+				{ text = string.format("movement: %s", movement), position = vmath.vector3(10,100, 0),
+				color = vmath.vector4(1, 1, 1, 1) } )
 	end
 
 	-- Move the game object up
